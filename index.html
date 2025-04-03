@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>富台指數與台指期換算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .market-info {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .market-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .market-open {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .market-closed {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .price-display {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .last-update {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .market-schedule {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .market-schedule h3 {
+            margin-top: 0;
+        }
+        .market-schedule ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .market-schedule li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>富台指數與台指期換算器</h1>
+        
+        <div class="market-info">
+            <div class="price-display">
+                <div>富台指數價格：<span id="ftse-price">載入中...</span></div>
+                <div>台指期價格：<span id="tx-price">載入中...</span></div>
+                <div>價差：<span id="price-diff">載入中...</span></div>
+            </div>
+            
+            <div class="market-status">
+                <div>
+                    <span>富台指數：</span>
+                    <span id="ftse-status">檢查中...</span>
+                </div>
+                <div>
+                    <span>台指期：</span>
+                    <span id="tx-status">檢查中...</span>
+                </div>
+            </div>
+            
+            <div class="last-update">
+                最後更新時間：<span id="last-update">-</span>
+            </div>
+        </div>
+
+        <div class="market-schedule">
+            <h3>市場交易時間</h3>
+            <ul>
+                <li>富台指數：08:45 - 13:45, 14:15 - 17:15 (新加坡時間)</li>
+                <li>台指期：08:45 - 13:45, 14:15 - 17:15 (台灣時間)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function updateMarketData() {
+            try {
+                const response = await fetch('https://tetsu811.github.io/ftse-converter/api/market-data');
+                const data = await response.json();
+                
+                // 更新價格
+                document.getElementById('ftse-price').textContent = data.ftsePrice.toFixed(2);
+                document.getElementById('tx-price').textContent = data.txPrice.toFixed(2);
+                document.getElementById('price-diff').textContent = (data.ftsePrice - data.txPrice).toFixed(2);
+                
+                // 更新市場狀態
+                document.getElementById('ftse-status').textContent = data.ftseMarketOpen ? '開盤中' : '已收盤';
+                document.getElementById('ftse-status').className = data.ftseMarketOpen ? 'market-open' : 'market-closed';
+                
+                document.getElementById('tx-status').textContent = data.txMarketOpen ? '開盤中' : '已收盤';
+                document.getElementById('tx-status').className = data.txMarketOpen ? 'market-open' : 'market-closed';
+                
+                // 更新最後更新時間
+                document.getElementById('last-update').textContent = new Date().toLocaleString('zh-TW');
+            } catch (error) {
+                console.error('Error fetching market data:', error);
+            }
+        }
+
+        // 每10秒更新一次數據
+        setInterval(updateMarketData, 10000);
+        updateMarketData(); // 初始載入
+    </script>
+</body>
+</html>
